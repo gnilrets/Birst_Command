@@ -8,8 +8,8 @@ module Birst_Command
     attr_accessor :options
     @options = {}
 
-    def read_config
-      @options = @options.merge!(JSON.parse(IO.read(@config_full_path), :symbolize_names => true))
+    def read_config(config_full_path = @config_full_path)
+      @options = @options.merge!(JSON.parse(IO.read(config_full_path), :symbolize_names => true))
     end
 
   end
