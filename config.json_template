@@ -1,4 +1,6 @@
 {
-    username: "name@myplace.com",
-    password: "obfuscated pwd"
+    "wsdl": "https://login.bws.birst.com/CommandWebService.asmx?WSDL",
+    "endpoint": "https://login.bws.birst.com/CommandWebService.asmx",
+    "username": "name@myplace.com",
+    "password": "obfuscated pwd"
 }
