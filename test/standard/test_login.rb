@@ -26,7 +26,6 @@ class Test_login < Test::Unit::TestCase
     assert_equal 32, token.length, "Got an invalid token #{token}"
   end
 
-
 end
 
 

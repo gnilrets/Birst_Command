@@ -65,5 +65,16 @@ module Birst_Command
     def command(&b)
       self.instance_eval(&b)
     end
+
+
+    def list_spaces
+      @response = @client.call(:list_spaces,
+        cookies: @auth_cookies,
+        message: {
+          token: "#{@token}"
+        })
+      @response.hash[:envelope][:body][:list_spaces_response][:list_spaces_result][:user_space]
+    end
+
   end
 end

@@ -9,36 +9,15 @@ class Test_list_spaces < Test::Unit::TestCase
   def teardown
   end
 
-  def test_login
-
-    client = Savon.client do
-      wsdl Birst_Command::Config.options[:wsdl]
-      endpoint Birst_Command::Config.options[:endpoint]
-      convert_request_keys_to :none
-      soap_version 1
-      pretty_print_xml true
-      filters [:password]
+  def test_list_spaces
+    spaces = nil
+    Session.start do
+      list_spaces.each { |space| puts space }
+      spaces = list_spaces
     end
 
-    response = client.call(:login) do
-      message username: Birst_Command::Config.options[:username], 
-              password: Obfuscate.deobfuscate(Birst_Command::Config.options[:password])
-    end
-
-    auth_cookies = response.http.cookies
-    token = response.hash[:envelope][:body][:login_response][:login_result]
-
-    response = client.call(:list_spaces, cookies: auth_cookies) do
-      message token: "#{token}"
-    end
-
-    spaces = response.hash[:envelope][:body][:list_spaces_response][:list_spaces_result][:user_space]
-    spaces.each { |space| puts space }
-
-    response = client.call(:logout, cookies: auth_cookies) do
-      message token: "#{token}"
-    end
-
+    assert spaces.is_a?(Array), "Expecting spaces to be an array"
+    assert spaces[0].is_a?(Hash), "Expecting spaces to be an array of hashes"
   end
 end
 
