@@ -15,10 +15,6 @@ module Birst_Command
       @response = nil
       @token = nil
       @auth_cookies = nil
-
-      if block_given?
-        self.instance_eval(&b)
-      end
     end
 
     attr_reader :token
@@ -52,7 +48,7 @@ module Birst_Command
       @response = @client.call(:logout, 
         cookies: @auth_cookies,
         message: {
-          token: "#{@token}"
+          token: @token
         })
     end
 
@@ -66,9 +62,43 @@ module Birst_Command
       @response = @client.call(:list_spaces,
         cookies: @auth_cookies,
         message: {
-          token: "#{@token}"
+          token: @token
         })
-      @response.hash[:envelope][:body][:list_spaces_response][:list_spaces_result][:user_space]
+      [@response.hash[:envelope][:body][:list_spaces_response][:list_spaces_result][:user_space]].flatten
+    end
+
+
+    def list_users_in_space(spaceid: "NOTSET")
+      @response = @client.call(:list_users_in_space,
+        cookies: @auth_cookies,
+        message: {
+          token: @token,
+          spaceID: spaceid
+        })
+      [@response.hash[:envelope][:body][:list_users_in_space_response][:list_users_in_space_result][:string]].flatten
+    end
+
+
+    def add_user_to_space(username: "tom@myspace.com",spaceid: "NOTSET",has_admin: false)
+      @response = @client.call(:add_user_to_space, 
+        cookies: auth_cookies,
+        message: {
+          token: @token,
+          userName: username,
+          spaceID: spaceid,
+          hasAdmin: has_admin.to_s
+        })
+    end
+
+
+    def remove_user_from_space(username: "tom@myspace.com",spaceid: "NOTSET")
+      @response = @client.call(:remove_user_from_space, 
+        cookies: auth_cookies,
+        message: {
+          token: @token,
+          userName: username,
+          spaceID: spaceid
+        })
     end
 
   end

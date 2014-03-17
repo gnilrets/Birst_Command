@@ -11,42 +11,20 @@ class Test_add_user_to_space < Test::Unit::TestCase
   end
 
   def test_add_user_to_space
-
     test_options = Birst_Command::Config.options[:test][:test_add_user_to_space]
 
-    client = Savon.client do
-      wsdl Birst_Command::Config.options[:wsdl]
-      endpoint Birst_Command::Config.options[:endpoint]
-      convert_request_keys_to :none
-      soap_version 1
-      pretty_print_xml true
-      filters [:password]
+    user_added = false
+    Session.start do
+      remove_user_from_space(username: test_options[:userName],
+                             spaceid: test_options[:spaceID])
+      add_user_to_space(username: test_options[:userName],
+                        spaceid: test_options[:spaceID],
+                        has_admin: false)
+      user_added = list_users_in_space(spaceid: test_options[:spaceID]).include? test_options[:userName]
     end
 
-    response = client.call(:login) do
-      message username: Birst_Command::Config.options[:username], 
-              password: Obfuscate.deobfuscate(Birst_Command::Config.options[:password])
-    end
-
-    auth_cookies = response.http.cookies
-    token = response.hash[:envelope][:body][:login_response][:login_result]
-
-    # Add valid user to space
-    response = client.call(:add_user_to_space, cookies: auth_cookies) do
-      message token: "#{token}", 
-              userName: "#{test_options[:userName]}", 
-              spaceID: "#{test_options[:spaceID]}", 
-              hasAdmin: "false"
-    end
-    puts response.hash
-
-
-    response = client.call(:logout, cookies: auth_cookies) do
-      message token: "#{token}"
-    end
-
+    assert user_added, "User #{test_options[:userName]} not added!"
   end
-
 end
 
 
