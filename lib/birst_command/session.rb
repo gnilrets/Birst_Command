@@ -1,13 +1,8 @@
 module Birst_Command
   class Session
     def initialize
-      Birst_Command::Config.read_config
-      puts "Birst_Command::Config.options = #{Birst_Command::Config.options}"
-      puts "Birst_Command::Config.options = #{Birst_Command::Config.options}"
-
       @options = Birst_Command::Config.options
-      puts "<Session>@options = #{@options}"
-      puts "<Session>@options[:wsdl] = #{@options[:wsdl]}"
+
       @client = Savon.client(
         wsdl: @options[:wsdl],
         endpoint: @options[:endpoint],

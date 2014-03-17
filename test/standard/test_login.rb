@@ -3,6 +3,7 @@ require "test_birst_command"
 class Test_login < Test::Unit::TestCase
 
   def setup
+    Birst_Command::Config.read_config
   end
 
   def teardown
