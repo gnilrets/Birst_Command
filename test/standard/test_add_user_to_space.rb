@@ -3,8 +3,8 @@ require "test_birst_command"
 class Test_add_user_to_space < Test::Unit::TestCase
 
   def setup
-    BCConfig.read_config
-    BCConfig.read_config(File.join(File.dirname(__FILE__),"../config_test.json"))
+    Birst_Command::Config.read_config
+    Birst_Command::Config.read_config(File.join(File.dirname(__FILE__),"../config_test.json"))
   end
 
   def teardown
@@ -12,11 +12,11 @@ class Test_add_user_to_space < Test::Unit::TestCase
 
   def test_add_user_to_space
 
-    test_options = BCConfig.options[:test][:test_add_user_to_space]
+    test_options = Birst_Command::Config.options[:test][:test_add_user_to_space]
 
     client = Savon.client do
-      wsdl BCConfig.options[:wsdl]
-      endpoint BCConfig.options[:endpoint]
+      wsdl Birst_Command::Config.options[:wsdl]
+      endpoint Birst_Command::Config.options[:endpoint]
       convert_request_keys_to :none
       soap_version 1
       pretty_print_xml true
@@ -24,8 +24,8 @@ class Test_add_user_to_space < Test::Unit::TestCase
     end
 
     response = client.call(:login) do
-      message username: BCConfig.options[:username], 
-              password: Obfuscate.deobfuscate(BCConfig.options[:password])
+      message username: Birst_Command::Config.options[:username], 
+              password: Obfuscate.deobfuscate(Birst_Command::Config.options[:password])
     end
 
     auth_cookies = response.http.cookies

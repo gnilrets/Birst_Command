@@ -1,9 +1,9 @@
 require "test_birst_command"
 
-class Test_logon < Test::Unit::TestCase
+class Test_login < Test::Unit::TestCase
 
   def setup
-    BCConfig.read_config
+    Birst_Command::Config.read_config
   end
 
   def teardown
@@ -12,8 +12,8 @@ class Test_logon < Test::Unit::TestCase
   def test_login
 
     client = Savon.client do
-      wsdl BCConfig.options[:wsdl]
-      endpoint BCConfig.options[:endpoint]
+      wsdl Birst_Command::Config.options[:wsdl]
+      endpoint Birst_Command::Config.options[:endpoint]
       convert_request_keys_to :none
       soap_version 1
       pretty_print_xml true
@@ -21,8 +21,8 @@ class Test_logon < Test::Unit::TestCase
     end
 
     response = client.call(:login) do
-      message username: BCConfig.options[:username], 
-              password: Obfuscate.deobfuscate(BCConfig.options[:password])
+      message username: Birst_Command::Config.options[:username], 
+              password: Obfuscate.deobfuscate(Birst_Command::Config.options[:password])
     end
 
     auth_cookies = response.http.cookies
@@ -32,9 +32,7 @@ class Test_logon < Test::Unit::TestCase
       message token: "#{token}"
     end
 
-#    assert_equal "name@myplace.com", BCConfig.options[:username], "Error with config file"
   end
-
 end
 
 

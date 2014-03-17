@@ -1,5 +1,5 @@
 module Birst_Command
-  module BCConfig
+  module Config
     extend self
 
     attr_accessor :config_full_path
