@@ -54,7 +54,7 @@ module Birst_Command
 
 
     def command(&b)
-      self.instance_eval(&b)
+      yield self
     end
 
 
@@ -81,7 +81,7 @@ module Birst_Command
 
     def add_user_to_space(username: "tom@myspace.com",space_id: "NOTSET",has_admin: false)
       @response = @client.call(:add_user_to_space, 
-        cookies: auth_cookies,
+        cookies: @auth_cookies,
         message: {
           token: @token,
           userName: username,
@@ -93,12 +93,34 @@ module Birst_Command
 
     def remove_user_from_space(username: "tom@myspace.com",space_id: "NOTSET")
       @response = @client.call(:remove_user_from_space, 
-        cookies: auth_cookies,
+        cookies: @auth_cookies,
         message: {
           token: @token,
           userName: username,
           spaceID: space_id
         })
+    end
+
+    def create_new_space(space_name: "NOTSET", comments: "", automatic: false)
+      @response = @client.call(:create_new_space,
+        cookies: @auth_cookies,
+        message: {
+          token: @token,
+          spaceName: space_name,
+          comments: "",
+          automatic: automatic.to_s
+        })
+      @response.hash[:envelope][:body][:create_new_space_response][:create_new_space_result]
+    end
+
+    def delete_space(space_id: "NOTSET")
+      @response = @client.call(:delete_space,
+        cookies: @auth_cookies,
+        message: {
+          token: @token,
+          spaceId: space_id,
+        })
+      @response.hash[:envelope][:body][:delete_space_response][:delete_space_result]
     end
 
   end
