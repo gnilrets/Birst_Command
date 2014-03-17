@@ -11,17 +11,8 @@ class Test_login < Test::Unit::TestCase
 
   def test_login
     token = ""
-    Session.start do
-      token = @token
-    end
-
-    assert_equal 32, token.length, "Got an invalid token #{token}"
-  end
-
-  def test_login_arg
-    token = ""
-    Session.start do |s|
-      token = s.token
+    Session.start do |bc|
+      token = bc.token
     end
 
     assert_equal 32, token.length, "Got an invalid token #{token}"

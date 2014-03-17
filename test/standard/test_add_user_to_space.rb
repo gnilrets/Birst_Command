@@ -14,13 +14,13 @@ class Test_add_user_to_space < Test::Unit::TestCase
     test_options = Birst_Command::Config.options[:test][:test_add_user_to_space]
 
     user_added = false
-    Session.start do
-      remove_user_from_space(username: test_options[:username],
-                             space_id: test_options[:space_id])
-      add_user_to_space(username: test_options[:username],
-                        space_id: test_options[:space_id],
-                        has_admin: false)
-      user_added = list_users_in_space(space_id: test_options[:space_id]).include? test_options[:username]
+    Session.start do |bc|
+      bc.remove_user_from_space(username: test_options[:username],
+                                space_id: test_options[:space_id])
+      bc.add_user_to_space(username: test_options[:username],
+                           space_id: test_options[:space_id],
+                           has_admin: false)
+      user_added = bc.list_users_in_space(space_id: test_options[:space_id]).include? test_options[:username]
     end
 
     assert user_added, "User #{test_options[:username]} not added!"
