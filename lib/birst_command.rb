@@ -11,5 +11,6 @@ require 'json'
 
 require 'birst_command/config'
 require 'birst_command/obfuscate'
+require 'birst_command/session'
 
 include Birst_Command

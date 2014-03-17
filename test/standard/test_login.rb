@@ -3,36 +3,30 @@ require "test_birst_command"
 class Test_login < Test::Unit::TestCase
 
   def setup
-    Birst_Command::Config.read_config
   end
 
   def teardown
   end
 
   def test_login
-
-    client = Savon.client do
-      wsdl Birst_Command::Config.options[:wsdl]
-      endpoint Birst_Command::Config.options[:endpoint]
-      convert_request_keys_to :none
-      soap_version 1
-      pretty_print_xml true
-      filters [:password]
+    token = ""
+    Session.start do
+      token = @token
     end
 
-    response = client.call(:login) do
-      message username: Birst_Command::Config.options[:username], 
-              password: Obfuscate.deobfuscate(Birst_Command::Config.options[:password])
-    end
-
-    auth_cookies = response.http.cookies
-    token = response.hash[:envelope][:body][:login_response][:login_result]
-
-    response = client.call(:logout, cookies: auth_cookies) do
-      message token: "#{token}"
-    end
-
+    assert_equal 32, token.length, "Got an invalid token #{token}"
   end
+
+  def test_login_arg
+    token = ""
+    Session.start do |s|
+      token = s.token
+    end
+
+    assert_equal 32, token.length, "Got an invalid token #{token}"
+  end
+
+
 end
 
 
