@@ -68,36 +68,36 @@ module Birst_Command
     end
 
 
-    def list_users_in_space(spaceid: "NOTSET")
+    def list_users_in_space(space_id: "NOTSET")
       @response = @client.call(:list_users_in_space,
         cookies: @auth_cookies,
         message: {
           token: @token,
-          spaceID: spaceid
+          spaceID: space_id
         })
       [@response.hash[:envelope][:body][:list_users_in_space_response][:list_users_in_space_result][:string]].flatten
     end
 
 
-    def add_user_to_space(username: "tom@myspace.com",spaceid: "NOTSET",has_admin: false)
+    def add_user_to_space(username: "tom@myspace.com",space_id: "NOTSET",has_admin: false)
       @response = @client.call(:add_user_to_space, 
         cookies: auth_cookies,
         message: {
           token: @token,
           userName: username,
-          spaceID: spaceid,
+          spaceID: space_id,
           hasAdmin: has_admin.to_s
         })
     end
 
 
-    def remove_user_from_space(username: "tom@myspace.com",spaceid: "NOTSET")
+    def remove_user_from_space(username: "tom@myspace.com",space_id: "NOTSET")
       @response = @client.call(:remove_user_from_space, 
         cookies: auth_cookies,
         message: {
           token: @token,
           userName: username,
-          spaceID: spaceid
+          spaceID: space_id
         })
     end
 
