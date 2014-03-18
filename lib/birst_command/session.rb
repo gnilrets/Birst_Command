@@ -24,9 +24,8 @@ module Birst_Command
 
     def self.start(&b)
       session = self.new
-
       session.login
-      session.command(&b)
+      session.commands(&b)
     ensure
       session.logout
     end
@@ -44,84 +43,26 @@ module Birst_Command
     end
 
 
-    def logout
-      @response = @client.call(:logout, 
-        cookies: @auth_cookies,
-        message: {
-          token: @token
-        })
-    end
-
-
-    def command(&b)
+    def commands(&b)
       yield self
     end
 
 
-    def list_spaces
-      @response = @client.call(:list_spaces,
-        cookies: @auth_cookies,
-        message: {
-          token: @token
-        })
-      [@response.hash[:envelope][:body][:list_spaces_response][:list_spaces_result][:user_space]].flatten
+    def method_missing(operation_name, *args)
+      operation operation_name, *args
     end
 
 
-    def list_users_in_space(space_id: "NOTSET")
-      @response = @client.call(:list_users_in_space,
-        cookies: @auth_cookies,
-        message: {
-          token: @token,
-          spaceID: space_id
-        })
-      [@response.hash[:envelope][:body][:list_users_in_space_response][:list_users_in_space_result][:string]].flatten
+    def operation(operation_name, *args)
+      response_key = "#{operation_name}_response".to_sym
+      result_key = "#{operation_name}_result".to_sym
+
+      message = args.last.is_a?(Hash) ? args.pop : {}
+      result = @client.call operation_name,
+                            cookies: @auth_cookies,
+                            message: { :token => @token }.merge(message)
+
+      result.hash[:envelope][:body][response_key][result_key]
     end
-
-
-    def add_user_to_space(username: "tom@myspace.com",space_id: "NOTSET",has_admin: false)
-      @response = @client.call(:add_user_to_space, 
-        cookies: @auth_cookies,
-        message: {
-          token: @token,
-          userName: username,
-          spaceID: space_id,
-          hasAdmin: has_admin.to_s
-        })
-    end
-
-
-    def remove_user_from_space(username: "tom@myspace.com",space_id: "NOTSET")
-      @response = @client.call(:remove_user_from_space, 
-        cookies: @auth_cookies,
-        message: {
-          token: @token,
-          userName: username,
-          spaceID: space_id
-        })
-    end
-
-    def create_new_space(space_name: "NOTSET", comments: "", automatic: false)
-      @response = @client.call(:create_new_space,
-        cookies: @auth_cookies,
-        message: {
-          token: @token,
-          spaceName: space_name,
-          comments: "",
-          automatic: automatic.to_s
-        })
-      @response.hash[:envelope][:body][:create_new_space_response][:create_new_space_result]
-    end
-
-    def delete_space(space_id: "NOTSET")
-      @response = @client.call(:delete_space,
-        cookies: @auth_cookies,
-        message: {
-          token: @token,
-          spaceId: space_id,
-        })
-      @response.hash[:envelope][:body][:delete_space_response][:delete_space_result]
-    end
-
   end
 end

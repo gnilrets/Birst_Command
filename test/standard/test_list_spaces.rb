@@ -12,8 +12,8 @@ class Test_list_spaces < Test::Unit::TestCase
   def test_list_spaces
     spaces = nil
     Session.start do |bc|
-      bc.list_spaces.each { |space| puts space }
-      spaces = bc.list_spaces
+      unclean_spaces = bc.list_spaces
+      spaces = [unclean_spaces[:user_space]].flatten
     end
 
     assert spaces.is_a?(Array), "Expecting spaces to be an array"

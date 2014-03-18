@@ -10,19 +10,18 @@ class Test_copy_space < Test::Unit::TestCase
 
   def teardown
     Session.start do |bc|
-      bc.delete_space(space_id: @new_space_id)
+      bc.delete_space :spaceId => @new_space_id
     end
   end
 
-  def test_add_user_to_space
+  def test_copy_space
     test_options = Birst_Command::Config.options[:test][:test_copy_space]
 
     Session.start do |bc|
-      bc.list_spaces.each do |space|
-        puts "SPACE: #{space}"
-      end
-
-      @new_space_id = bc.create_new_space(space_name:"TESTME")
+      @new_space_id = bc.create_new_space :spaceName => "test_copy_space",
+                                          :comments => "",
+                                          :automatic => "false"
+      puts "#{bc.list_spaces}"
     end
 
     assert_equal 36, @new_space_id.length, "Got an invalid space id #{@new_space_id}"
