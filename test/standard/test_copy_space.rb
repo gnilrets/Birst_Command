@@ -21,11 +21,35 @@ class Test_copy_space < Test::Unit::TestCase
       @new_space_id = bc.create_new_space :spaceName => "test_copy_space",
                                           :comments => "",
                                           :automatic => "false"
-      puts "#{bc.list_spaces}"
+
+      puts "#{JSON.pretty_generate bc.list_spaces}"
+      job_token = bc.copy_space :spFromID => test_options[:from_space_id],
+                                :spToID => @new_space_id,
+                                :mode => "copy",
+                                :options => "data;settings-permissions;settings-membership;repository;birst-connect;custom-subject-areas;dashboardstyles;salesforce;catalog;CustomGeoMaps.xml;spacesettings.xml;SavedExpressions.xml;DrillMaps.xml;connectors;datastore-aggregates;settings-basic"
+
+
+      i = 0
+      loop do
+        i += 1
+        if i < 60
+          status = bc.get_job_status :jobToken => job_token
+          puts "#{JSON.pretty_generate status}"
+
+          is_job_complete = bc.is_job_complete :jobToken => job_token
+          puts "COMPLETE? #{is_job_complete}"
+          sleep 1
+
+          break if is_job_complete
+        else
+          raise "Copy job timed out"
+        end
+      end
+
+
     end
 
     assert_equal 36, @new_space_id.length, "Got an invalid space id #{@new_space_id}"
   end
 end
-
 
