@@ -9,7 +9,9 @@ module Birst_Command
         convert_request_keys_to: :none,
         soap_version: 1,
         pretty_print_xml: true,
-        filters: [:password]
+        filters: [:password],
+        log_level: @options[:soap_log_level],
+        log: @options[:soap_log]
       )
 
       @response = nil
