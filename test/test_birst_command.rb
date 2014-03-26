@@ -6,3 +6,5 @@ require 'test/unit'
 require 'benchmark'
 
 Birst_Command::Config.set_debug
+
+include Birst_Command
