@@ -1,9 +1,11 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
 
+require 'Birst_Command/version'
+
 Gem::Specification.new do |s|
   s.name        = "Birst_Command"
-  s.version     = "0.0.1"
+  s.version     = Birst_Command::VERSION
   s.authors     = ["Sterling Paramore"]
   s.email       = ["gnilrets@gmail.com"]
   s.homepage    = "https://github.com/gnilrets"
