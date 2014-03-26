@@ -27,7 +27,7 @@ module Birst_Command
     def self.start(&b)
       session = self.new
       session.login
-      session.commands(&b)
+      session.execute_block(&b)
     ensure
       session.logout
     end
@@ -45,22 +45,22 @@ module Birst_Command
     end
 
 
-    def commands(&b)
+    def execute_block(&b)
       yield self
     end
 
 
-    def method_missing(operation_name, *args)
-      operation operation_name, *args
+    def method_missing(command_name, *args)
+      command command_name, *args
     end
 
 
-    def operation(operation_name, *args)
-      response_key = "#{operation_name}_response".to_sym
-      result_key = "#{operation_name}_result".to_sym
+    def command(command_name, *args)
+      response_key = "#{command_name}_response".to_sym
+      result_key = "#{command_name}_result".to_sym
 
       message = args.last.is_a?(Hash) ? args.pop : {}
-      result = @client.call operation_name,
+      result = @client.call command_name,
                             cookies: @auth_cookies,
                             message: { :token => @token }.merge(message)
 

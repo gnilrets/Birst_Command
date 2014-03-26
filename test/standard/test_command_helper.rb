@@ -8,11 +8,11 @@ class Test_command_helper < Test::Unit::TestCase
 
   class Session < Birst_Command::Session
     def list_spaces(*args)
-      result = operation __method__, *args
+      result = command __method__, *args
       [result[:user_space]].flatten
     end 
     def list_users_in_space(*args)
-      result = operation __method__, *args
+      result = command __method__, *args
       [result[:string]].flatten
     end
  end
