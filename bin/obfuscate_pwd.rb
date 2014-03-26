@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
-require File.join(File.dirname(__FILE__),"..","lib","birst_command")
+require "birst_command"
 
-begin
-  puts Obfuscate.obfuscate(ARGV[0])
-rescue
+if ARGV[0]
+  puts Birst_Command::Obfuscate.obfuscate(ARGV[0])
+else
   puts "USAGE: ./obfuscate_pwd <plaintxt password>"
 end
 
