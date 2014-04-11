@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby
+
+# FOR TESTING ONLY
+$LOAD_PATH << File.join(File.dirname(__FILE__),"../lib")
+require 'rubygems'
+require 'bundler/setup'
+# REMOVE THE ABOVE
+
+require "birst_command"
+require "optparse"
+
+module BirstCL
+  extend self
+
+  def set_options
+    @options = {}
+
+    OptionParser.new do |opts|
+      opts.banner = "Usage: birstcl -c <COMMAND> -a <ARGUMENTS>"
+
+      opts.on("--verbose", "--[no-]verbose", "Run verbosely") do |v|
+        @options[:verbose] = v
+      end
+
+      opts.on("-h","--help", "Show this message") do
+        puts opts
+        exit
+      end
+
+      @options[:command] = nil
+      opts.on("-c","--command <COMMAND>","COMMAND is the snake_case Birst web API command") do |opt|
+        @options[:command] = opt
+      end
+
+      @options[:arguments] = {}
+      opts.on("-a","--args <ARGUMNETS>","ARGUMENTS is a JSON string of arguments to COMMAND") do |opt|
+        @options[:arguments] = eval(opt)
+      end
+
+=begin
+      @options[:json_full_path] = nil
+      opts.on("-f","--file <JSON FILE>","Path to JSON file containing command") do |opt|
+        @options[:json_full_path] = opt
+      end
+=end
+
+      @options[:config_full_path] = "#{ENV['HOME']}/.birstcl"
+      opts.on("-s","--config_file <CONFIG FILE>", "Path to config file containing credentials (default: $HOME/.birstcl)") do |opt|
+        @options[:config_full_path] = opt
+      end
+    end.parse!
+  end
+
+
+  def read_config_file
+    Birst_Command::Config.read_config(@options[:config_full_path])
+  end
+
+
+  def execute_command
+    output = {}
+
+    output[:command] = @options[:command]
+    output[:arguments] = @options[:arguments]
+    Birst_Command::Session.start do |bc|
+      output[:token] = bc.token
+      output[:auth_cookies] = bc.auth_cookies.inspect
+      output[:result] = bc.send(@options[:command], @options[:arguments])
+    end
+    puts "#{JSON.pretty_generate output}"
+  end
+end
+
+BirstCL.set_options
+BirstCL.read_config_file
+BirstCL.execute_command
