@@ -12,8 +12,9 @@ Gem::Specification.new do |s|
   s.license     = "MIT"
   s.summary     = "Birst Command"
   s.description = "Ruby interface to Birst web API"
-
   s.rubyforge_project = "Birst_Command"
+
+  s.required_ruby_version = '~> 2'
   s.add_runtime_dependency "savon", ["~> 2.0"]
   s.add_runtime_dependency "httpclient", ["~> 2.3"]
 

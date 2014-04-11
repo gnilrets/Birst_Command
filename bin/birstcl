@@ -1,11 +1,5 @@
 #!/usr/bin/env ruby
 
-# FOR TESTING ONLY
-$LOAD_PATH << File.join(File.dirname(__FILE__),"../lib")
-require 'rubygems'
-require 'bundler/setup'
-# REMOVE THE ABOVE
-
 require "birst_command"
 require "optparse"
 
@@ -22,6 +16,11 @@ module BirstCL
         @options[:verbose] = v
       end
 
+      @options[:version] = false
+      opts.on("--version", "--version", "Print version") do |v|
+        @options[:version] = true
+      end
+      
       opts.on("-h","--help", "Show this message") do
         puts opts
         exit
@@ -49,6 +48,11 @@ module BirstCL
         @options[:config_full_path] = opt
       end
     end.parse!
+
+    if @options[:version]
+      puts "Birst_Command Version: #{Birst_Command::VERSION}"
+      exit
+    end
   end
 
 
