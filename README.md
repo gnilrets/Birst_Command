@@ -9,6 +9,8 @@ Birst user that needed to set up a very basic Ruby interface.
 
 # Installation & Setup
 
+Prerequisites: Ruby > 2.0 and rubygems.
+
 Install the gem using `gem install Birst_Command` or using rvm or
 rbenv/bundler as you prefer.
 
