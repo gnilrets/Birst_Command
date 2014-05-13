@@ -24,23 +24,25 @@ module Birst_Command
     attr_reader :response
 
 
-    def self.start(&b)
+    def self.start(use_cookie: nil, &b)
       session = self.new
-      session.login
+      session.login(use_cookie: use_cookie)
       session.execute_block(&b)
     ensure
       session.logout
     end
 
 
-    def login
+    def login(use_cookie: nil)
+      @auth_cookies = use_cookie
       @response = @client.call(:login,
+        cookies: @auth_cookies,
         message: {
           username: @options[:username], 
           password: Obfuscate.deobfuscate(@options[:password])
         })
 
-      @auth_cookies = @response.http.cookies
+      @auth_cookies = @response.http.cookies if @auth_cookies.nil?
       @token = @response.hash[:envelope][:body][:login_response][:login_result]      
     end
 
