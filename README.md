@@ -19,13 +19,15 @@ that contains the credentials you'll use to connect to Birst.  This
 config file should look like,
 
     {
-        "wsdl": "https://login.bws.birst.com/CommandWebService.asmx?WSDL",
-        "endpoint": "https://login.bws.birst.com/CommandWebService.asmx",
+        "wsdl": "https://app2102.bws.birst.com/CommandWebService.asmx?WSDL",
+        "endpoint": "https://app2102.bws.birst.com/CommandWebService.asmx",
         "username": "name@myplace.com",
         "password": "obfuscated pwd"
     }
 
-Most users should only need to modify the username and password.
+Most users should only need to modify the username and
+password. (**Note**: do not use `login.bws.birst.com` since it does
+not use an updated WSDL; a specific app server must be specified).
 Since I have a strong aversion to storing passwords in plaintext, the
 password in the config file needs to be an obfuscated password.  Birst
 Command comes with a password obfuscator that can be executed via
@@ -62,6 +64,24 @@ Get list of sources for a space
 Copy space with options
 
     birstcl -c copy_space -a '{ spFromID: "9ab9865c-37a8-0586-e856-ddd3856a0371", spToID: "3957a9b7-38c1-175v-3985-1957f1836a93", mode: "replicate", options: "data;repository;settings-basic" }'
+
+## Cookies
+
+Many Birst web API commands return a job token that can be used to check up
+on the status of a job as it progresses.  The job tokens are tied to a specific
+server, and the only way to direct your login to a specific server is to use
+cookies.  So, if you wanted to copy a space with one command and then
+check whether the job is complete with another, you need to do something
+like the following.
+
+Copy a space and write a cookie file
+
+    birstcl -c copy_space -a '{ spFromID: "f9cb64fe-58a1-1db6-a7a8-9f091b4ea96f", spToID: "12913e53-3eac-4f98-91ab-2fqf345e22e5", mode: "replicate", options: "data;datastore;repository;useunloadfeature" }' -w ./cookie
+
+Note the job token returned as result and then run another command to
+check whether the job is complete by reading the cookie file
+
+    birstcl -c is_job_complete -a '{ jobToken: "9f636262f4c73d7503bf240ea08de040" }' -r ./cookie
 
 # Usage - As Ruby library
 
@@ -110,6 +130,29 @@ The `spaces` variable is a Ruby hash parsed from the SOAP response.
 The structure of the returned hash follows the structure that Birst
 returns.
 
+## Cookies
+
+The start session block can also accept an argument named `use_cookie` to
+pass a cookie to be used during startup.  For example, suppose we start
+a copy job and save the `session_cookie` and `job_token` in variables.
+
+````ruby
+session_cookie = nil
+job_token = nil
+Session.start do |bc|
+  job_token = bc.copy_space :spFromID => @from_id, :spToID => @to_id, :mode => "replicate", :options => "data;datastore;useunloadfeature"
+  session_cookie = bc.auth_cookies
+end
+````
+In a subsequent session we can use the `session_cookie` on login via
+
+````ruby
+is_job_complete = false
+Session.start use_cookie: session_cookie do |bc|
+  is_job_complete = bc.is_job_complete :jobToken => job_token
+end
+puts "COMPLETE? #{is_job_complete}"
+````
 
 ## Helper methods
 
@@ -137,6 +180,7 @@ I have not included any of these helper methods in the Birst Command
 gem because what I find helpful, you may not.  Birst Command just
 provides the basic interface.
 
+
 ## Command arguments
 
 Some Birst API commands require arguments.  All arguments are supplied
@@ -144,9 +188,7 @@ as an argument hash.  For example, to create a new space,
 
 ````ruby
 Birst_Command::Session.start do |bc|
-  new_space_id = bc.create_new_space :spaceName => "myNewSpace",
-                                     :comments => "Just testing",
-                                     :automatic => "false"
+  new_space_id = bc.create_new_space :spaceName => "myNewSpace", :comments => "Just testing",:automatic => "false"
 end
 ````
 

@@ -47,6 +47,17 @@ module BirstCL
       opts.on("-s","--config_file <CONFIG FILE>", "Path to config file containing credentials (default: $HOME/.birstcl)") do |opt|
         @options[:config_full_path] = opt
       end
+
+      @options[:write_cookie_full_path] = nil
+      opts.on("-w","--write_cookie_file <COOKIE FILE>", "Path to cookie file to write") do |opt|
+        @options[:write_cookie_full_path] = opt
+      end
+
+      @options[:read_cookie_full_path] = nil
+      opts.on("-r","--read_cookie_file <COOKIE FILE>", "Path to cookie file to read") do |opt|
+        @options[:read_cookie_full_path] = opt
+      end
+
     end.parse!
 
     if @options[:version]
@@ -61,17 +72,31 @@ module BirstCL
   end
 
 
+  def write_cookie_file(file_full_path)
+    return nil if file_full_path.nil?
+    File.open(file_full_path, 'w') {|f| f.write(Marshal.dump(@session_cookie)) }
+  end
+
+  def read_cookie_file(file_full_path)
+    return nil if file_full_path.nil?
+    Marshal.load(File.read(file_full_path))
+  end
+
+
   def execute_command
+    @session_cookie = read_cookie_file(@options[:read_cookie_full_path])
     output = {}
 
     output[:command] = @options[:command]
     output[:arguments] = @options[:arguments]
-    Birst_Command::Session.start do |bc|
+    Birst_Command::Session.start use_cookie: @session_cookie do |bc|
       output[:token] = bc.token
       output[:auth_cookies] = bc.auth_cookies.inspect
       output[:result] = bc.send(@options[:command], @options[:arguments])
+      @session_cookie = bc.auth_cookies
     end
     puts "#{JSON.pretty_generate output}"
+    write_cookie_file(@options[:write_cookie_full_path])
   end
 end
 
