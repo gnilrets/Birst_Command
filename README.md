@@ -2,7 +2,8 @@ Birst_Command
 ====================
 
 Birst Command is a Ruby gem that allows you to build Ruby scripts that
-interface with the Birst Web API.
+interface with the Birst Web API.  It also comes with a simple command line
+tool that can be used to execute simple API requests from the command line.
 
 Note: this is not an officially-sanctioned Birst project.  I'm just a
 Birst user that needed to set up a very basic Ruby interface.
@@ -130,6 +131,18 @@ The `spaces` variable is a Ruby hash parsed from the SOAP response.
 The structure of the returned hash follows the structure that Birst
 returns.
 
+## Command arguments
+
+Some Birst API commands require arguments.  All arguments are supplied
+as an argument hash.  All arguments are mandatory even if they're blank/null
+(Birst web API requirement).  For example, to create a new space,
+
+````ruby
+Birst_Command::Session.start do |bc|
+  new_space_id = bc.create_new_space :spaceName => "myNewSpace", :comments => "Just testing",:automatic => "false"
+end
+````
+
 ## Cookies
 
 The start session block can also accept an argument named `use_cookie` to
@@ -157,7 +170,8 @@ puts "COMPLETE? #{is_job_complete}"
 ## Helper methods
 
 I find some of the Birst API responses to be rather cumbersome.  For
-example, why do I need hash with a single `user_space` key?  I'd
+example, why do I need hash with a single `user_space` key when I 
+run the `list_spaces` command?  I'd
 rather have an array of hashes here.  To that end I find it convenient
 to define helper methods that extend the Session class to simplify
 some of this.  To override the return value of the native
@@ -180,17 +194,6 @@ I have not included any of these helper methods in the Birst Command
 gem because what I find helpful, you may not.  Birst Command just
 provides the basic interface.
 
-
-## Command arguments
-
-Some Birst API commands require arguments.  All arguments are supplied
-as an argument hash.  For example, to create a new space,
-
-````ruby
-Birst_Command::Session.start do |bc|
-  new_space_id = bc.create_new_space :spaceName => "myNewSpace", :comments => "Just testing",:automatic => "false"
-end
-````
 
 ## camelCase/snake_case issues
 
