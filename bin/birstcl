@@ -6,6 +6,24 @@ require "optparse"
 module BirstCL
   extend self
 
+  def run
+    set_options
+
+    if @options[:version]
+      puts "Birst_Command Version: #{Birst_Command::VERSION}"
+      exit
+    end
+
+    if @options[:encrypt_password]
+      encrypt_password(@options[:encrypt_password])
+    end
+
+    if @options[:command]
+      read_config_file
+      execute_command
+    end
+  end
+
   def set_options
     @options = {}
 
@@ -24,6 +42,11 @@ module BirstCL
       opts.on("-h","--help", "Show this message") do
         puts opts
         exit
+      end
+
+      @options[:encrypt_password] = nil
+      opts.on("-e","--encrypt_password <PASSWORD>","Generates an encrypted version of PASSWORD that needs to be placed in ~/.birstcl") do |opt|
+        @options[:encrypt_password] = opt
       end
 
       @options[:command] = nil
@@ -57,18 +80,20 @@ module BirstCL
       opts.on("-r","--read_cookie_file <COOKIE FILE>", "Path to cookie file to read") do |opt|
         @options[:read_cookie_full_path] = opt
       end
-
     end.parse!
-
-    if @options[:version]
-      puts "Birst_Command Version: #{Birst_Command::VERSION}"
-      exit
-    end
   end
 
 
   def read_config_file
     Birst_Command::Config.read_config(@options[:config_full_path])
+  end
+
+  def encrypt_password(password)
+    Birst_Command::Password.generate_keys(verbose: true)
+    puts <<-EOF.unindent
+    ...
+    Use this encrypted password in your .birstcl file: "#{Birst_Command::Password.encrypt(password)}"
+    EOF
   end
 
 
@@ -100,6 +125,4 @@ module BirstCL
   end
 end
 
-BirstCL.set_options
-BirstCL.read_config_file
-BirstCL.execute_command
+BirstCL.run

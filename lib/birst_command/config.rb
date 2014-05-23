@@ -1,4 +1,5 @@
 module Birst_Command
+  require 'erb'
   module Config
     extend self
 
@@ -12,7 +13,9 @@ module Birst_Command
     }
 
     def read_config(config_full_path = @config_full_path)
-      @options = @options.merge!(JSON.parse(IO.read(config_full_path), :symbolize_names => true))
+      parse_erb = ERB.new(IO.read(config_full_path)).result(binding)
+      parse_json = JSON.parse(parse_erb, :symbolize_names => true)
+      @options = @options.merge!(parse_json)
     end
     
     def set_debug
