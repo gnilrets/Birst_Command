@@ -10,6 +10,9 @@ Birst user that needed to set up a very basic Ruby interface.
 
 # Installation & Setup
 
+**SPECIAL NOTE:** Password management has changed since version 0.3.0.
+It is now more secure but requires some new configuration.
+
 Prerequisites: Ruby > 2.0 and rubygems.
 
 Install the gem using `gem install Birst_Command` or using rvm or
@@ -23,23 +26,38 @@ config file should look like,
         "wsdl": "https://app2102.bws.birst.com/CommandWebService.asmx?WSDL",
         "endpoint": "https://app2102.bws.birst.com/CommandWebService.asmx",
         "username": "name@myplace.com",
-        "password": "obfuscated pwd"
+        "password": "encrypted pwd"
     }
 
-Most users should only need to modify the username and
-password. (**Note**: do not use `login.bws.birst.com` since it does
-not use an updated WSDL; a specific app server must be specified).
-Since I have a strong aversion to storing passwords in plaintext, the
-password in the config file needs to be an obfuscated password.  Birst
-Command comes with a password obfuscator that can be executed via
+Save it to `$HOME/.birstcl`.  Most users should only need to modify
+the username and password. (**Note**: do not use `login.bws.birst.com`
+since it does not use an updated WSDL; a specific app server must be
+specified).  Since I have a strong aversion to storing passwords in
+plaintext, the password in the config file needs to use and encrypted
+password.  Birst Command comes with a password encryptor that can be
+executed via
 
-    $ obfuscate_pwd.rb mypassword
-    0x8GOZ5nA3oRSSS8ao1l6Q==
+````bash
+$ birstcl -e mypassword
+````
 
-Copy and paste the obfuscated password into the config file and **save
-to a secure location**.  If any attacker is able to get your
-obfuscated password and knows it was created using this program, it
-would be trivial to get your Birst login credentials.
+which should give an output similar to
+````
+Set these keys as environment variables
+ - Do not lose them or you will have to regenerate your password.
+ - Keep them secure, your password is compromised if these keys are compromised.
+ - Remove them as environment variables to generate new ones
+BIRST_COMMAND_IV="3Nn26chRPkclusqTHePpig=="
+BIRST_COMMAND_KEY="MWHa7gksYQaZTTq4snjyOnBDWUnKaVJq1VF4cv82MgA="
+BIRST_COMMAND_SALT="KI//0xfSrX4mdSpiSp69BQ=="
+...
+Use this encrypted password in your .birstcl file: "JlCX9/RvHnGuWZWUcjTelg=="
+````
+
+Copy and paste the encrypted password into the config file.  You will
+also need to ensure that the three environment variables are set as
+indicated above.  If you're running in a development environment, you
+can include these in your bash `~/.profile` file.
 
 # Usage - Birst command line tool
 
@@ -170,7 +188,7 @@ puts "COMPLETE? #{is_job_complete}"
 ## Helper methods
 
 I find some of the Birst API responses to be rather cumbersome.  For
-example, why do I need hash with a single `user_space` key when I 
+example, why do I need hash with a single `user_space` key when I
 run the `list_spaces` command?  I'd
 rather have an array of hashes here.  To that end I find it convenient
 to define helper methods that extend the Session class to simplify
@@ -182,7 +200,7 @@ class Birst_Command::Session
   def list_spaces(*args)
     result = command __method__, *args
     [result[:user_space]].flatten
-  end 
+  end
 end
 ````
 
@@ -209,4 +227,3 @@ entirely consistent in its use of camelCase for arguments (e.g.,
 `listUsersInSpace`).  This inconsistency requires us to **submit
 commands as snake_case and arguments as the camelCase that Birst
 uses.**
-
