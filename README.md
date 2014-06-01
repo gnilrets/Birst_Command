@@ -1,5 +1,6 @@
 Birst_Command
 ====================
+[![Gem Version](https://badge.fury.io/rb/Birst_Command.svg)](http://badge.fury.io/rb/Birst_Command)
 
 Birst Command is a Ruby gem that allows you to build Ruby scripts that
 interface with the Birst Web API.  It also comes with a simple command line
