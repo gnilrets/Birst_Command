@@ -11,8 +11,8 @@ Birst user that needed to set up a very basic Ruby interface.
 
 # Installation & Setup
 
-**SPECIAL NOTE:** Password management has changed since version 0.3.0.
-It is now more secure but requires some new configuration.
+**SPECIAL NOTE:** Password management has changed since version 0.4.0.
+Read below for details.
 
 Prerequisites: Ruby > 2.0 and rubygems.
 
@@ -35,30 +35,26 @@ the username and password. (**Note**: do not use `login.bws.birst.com`
 since it does not use an updated WSDL; a specific app server must be
 specified).  Since I have a strong aversion to storing passwords in
 plaintext, the password in the config file needs to use and encrypted
-password.  Birst Command comes with a password encryptor that can be
+password.  Birst Command comes bundled with a password encryptor
+called [Envcrypt](https://github.com/gnilrets/envcrypt) that can be
 executed via
 
 ````bash
-$ birstcl -e mypassword
+$ envcrypt -s mypassword
 ````
 
 which should give an output similar to
 ````
-Set these keys as environment variables
- - Do not lose them or you will have to regenerate your password.
- - Keep them secure, your password is compromised if these keys are compromised.
- - Remove them as environment variables to generate new ones
-BIRST_COMMAND_IV="3Nn26chRPkclusqTHePpig=="
-BIRST_COMMAND_KEY="MWHa7gksYQaZTTq4snjyOnBDWUnKaVJq1VF4cv82MgA="
-BIRST_COMMAND_SALT="KI//0xfSrX4mdSpiSp69BQ=="
-...
-Use this encrypted password in your .birstcl file: "JlCX9/RvHnGuWZWUcjTelg=="
+Encrypted Secret: 2KwUMeJIqsjPWWF9Fw0I+w==
+ENVCRYPT_KEY='V/V919RKnz8l2M002336bg==$ARoQfp/9pfv5kVN/ysRuStLuTWJFZhQF1f49xkHbcwQ=$YAjVhHOXlcagmZoFYgPWdQ=='
+WARNING: It is critical that the key and encryption password be stored separately!
 ````
 
-Copy and paste the encrypted password into the config file.  You will
-also need to ensure that the three environment variables are set as
-indicated above.  If you're running in a development environment, you
-can include these in your bash `~/.profile` file.
+Copy and paste the encrypted password (aka "secret') into the
+`$HOME/.birstcl` config file.  You will also need to ensure that the
+`ENVCRYPT_KEY` environment variable is set as indicated above.  If you're
+running in a development environment, you can include these in your
+bash `~/.profile` file.
 
 # Usage - Birst command line tool
 
@@ -228,3 +224,8 @@ entirely consistent in its use of camelCase for arguments (e.g.,
 `listUsersInSpace`).  This inconsistency requires us to **submit
 commands as snake_case and arguments as the camelCase that Birst
 uses.**
+
+# Changelog
+
+* 0.5.0
+  * Migrated password handling to use Envcrypt

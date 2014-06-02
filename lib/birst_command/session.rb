@@ -34,12 +34,14 @@ module Birst_Command
 
 
     def login(use_cookie: nil)
+      crypt = Envcrypt::Envcrypter.new
+
       @auth_cookies = use_cookie
       @response = @client.call(:login,
         cookies: @auth_cookies,
         message: {
           username: @options[:username], 
-          password: Password.decrypt(@options[:password])
+          password: crypt.decrypt(@options[:password])
         })
 
       @auth_cookies = @response.http.cookies if @auth_cookies.nil?
