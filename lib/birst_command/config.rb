@@ -9,7 +9,8 @@ module Birst_Command
     attr_accessor :options
     @options = {
       :soap_log_level => :error,
-      :soap_log => false
+      :soap_log => false,
+      :soap_logger => Logger.new(STDOUT)
     }
 
     def read_config(config_full_path = @config_full_path)

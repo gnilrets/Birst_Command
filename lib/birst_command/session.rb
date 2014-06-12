@@ -1,18 +1,41 @@
 module Birst_Command
+
+  # Public: Session class used to interact with Birst Web Services
   class Session
-    def initialize
-      @options = Birst_Command::Config.options
+    # Public: Initialize Session class
+    #
+    # wsdl     - URL of soap WSDL (default: Settings.session.wsdl)
+    # endpoint - URL of soap endpoint (default: Settings.session.endpoint)
+    # soap_log - Boolean switch indicating whether logging should be performed (default: Settings.session.soap_log)
+    # soap_logger - Logger instance used to write log messages (default: Settings.session.soap_logger)
+    # soap_log_level - Logging level (default: Settings.session.soap_log_level)
+    # username - Username to use to login to Birst Web Services (default: Settings.session.username)
+    # password - Encrypted password for username (default: Settings.session.password)
+    #
+    # Returns nothing
+    def initialize(wsdl:           Settings.session.wsdl,
+                   endpoint:       Settings.session.endpoint, 
+                   soap_log:       Settings.session.soap_logger,
+                   soap_logger:    Settings.session.soap_logger,
+                   soap_log_level: Settings.session.soap_log_level,
+                   username:       Settings.session.username,
+                   password:       Settings.session.password
+                   )
 
       @client = Savon.client(
-        wsdl: @options[:wsdl],
-        endpoint: @options[:endpoint],
+        wsdl: wsdl,
+        endpoint: endpoint,
         convert_request_keys_to: :none,
         soap_version: 1,
         pretty_print_xml: true,
         filters: [:password],
-        log_level: @options[:soap_log_level],
-        log: @options[:soap_log]
+        logger: soap_logger,
+        log_level: soap_log_level,
+        log: soap_log
       )
+
+      @username = username
+      @password = decrypt(password)
 
       @response = nil
       @token = nil
@@ -22,6 +45,12 @@ module Birst_Command
     attr_reader :token
     attr_reader :auth_cookies
     attr_reader :response
+
+
+    def decrypt(password)
+      crypt = Envcrypt::Envcrypter.new
+      crypt.decrypt(password)
+    end
 
 
     def self.start(use_cookie: nil, &b)
@@ -40,8 +69,8 @@ module Birst_Command
       @response = @client.call(:login,
         cookies: @auth_cookies,
         message: {
-          username: @options[:username], 
-          password: crypt.decrypt(@options[:password])
+          username: @username, 
+          password: @password
         })
 
       @auth_cookies = @response.http.cookies if @auth_cookies.nil?
