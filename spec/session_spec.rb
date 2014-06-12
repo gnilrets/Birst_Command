@@ -1,42 +1,49 @@
 require 'savon/mock/spec_helper'
 
-describe "starting a session" do
+describe "running a session" do
   include Savon::SpecHelper
 
   before do
     Settings.session.soap_log_level = :debug
-
     savon.mock!
   end
 
   after { savon.unmock! }
 
-  it "should do something" do
-    crypt = Envcrypt::Envcrypter.new
+  describe "logging in and out" do
+    before do
+      crypt = Envcrypt::Envcrypter.new
 
-    message = { :username => Settings.session.username, :password => crypt.decrypt(Settings.session.password) }
-    savon.expects(:login).with(message: message).returns(BCSpecFixtures.login)
-#    savon.expects(:list_spaces).with(message: { :token => BCSpecFixtures.login_token }).returns(BCSpecFixtures.list_spaces)
-    savon.expects(:logout).with(message: { :token => BCSpecFixtures.login_token }).returns(BCSpecFixtures.logout)
+      message = { :username => Settings.session.username, :password => crypt.decrypt(Settings.session.password) }
+      savon.expects(:login).with(message: message).returns(BCSpecFixtures.login)
+      savon.expects(:logout).with(message: { :token => BCSpecFixtures.login_token }).returns(BCSpecFixtures.logout)
+    end
 
+    context "by calling the object methods directly" do
+      specify "without options" do
+        mysession = Session.new
+        expect(mysession.login).to be_successful
+        mysession.logout
+      end
 
-    mysession = Session.new
-    mysession.login
-    mysession.logout
+      specify "with options" do
+        mysession = Session.new :soap_log_level => :error, :soap_logger => Logger.new(STDOUT)
+        expect(mysession.login).to be_successful
+        mysession.logout
+      end
+    end
 
-#    bc = Session.new
-#    bc.login
-#    spaces = bc.list_spaces
-#    bc.logout
+    context "in a session block", :focus => true do
+      specify "without options" do
+        Session.new do |bc|
+        end
+      end
 
-#    Session.start do |bc|
-#      bc.list_spaces
-#    end.tap { |s| puts "#{JSON.pretty_generate s}" }
-
-#    response = mysession.response
-#    puts "Response: #{response}"
-#    expect(response).to be_successful
+      specify "with options" do
+        Session.new :soap_log_level => :error, :soap_logger => Logger.new(STDOUT) do |bc|
+        end
+      end
+    end
 
   end
-
 end
