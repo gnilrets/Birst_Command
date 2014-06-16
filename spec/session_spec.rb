@@ -1,7 +1,21 @@
 require 'savon/mock/spec_helper'
 
+module SessionHelper
+  def mock_login_and_out(&block)
+    crypt = Envcrypt::Envcrypter.new
+
+    message = { :username => Settings.session.username, :password => crypt.decrypt(Settings.session.password) }
+    savon.expects(:login).with(message: message).returns(BCSpecFixtures.login)
+    yield if block_given?
+    savon.expects(:logout).with(message: { :token => BCSpecFixtures.login_token }).returns(BCSpecFixtures.logout)
+  end
+end
+
+
+
 describe "Sessions" do
   include Savon::SpecHelper
+  include SessionHelper
 
   before { Settings.session.soap_log_level = :debug }
 
@@ -35,23 +49,71 @@ describe "Sessions" do
   end
 
 
+  shared_examples_for "list spaces" do
+    describe "list spaces" do
+      it "should list spaces" do
+        spaces = nil
+        Session.new do |bc|
+          spaces = bc.list_spaces
+        end
+
+        expect(spaces[:user_space].length).to be > 0
+      end
+    end
+  end
+
+  shared_examples_for "list users in space" do
+    describe "list users in space" do
+      it "should list the users in the space" do
+        users = nil
+        Session.new do |bc|
+          users = bc.list_users_in_space :spaceID => spaceID
+        end
+
+        expect(users[:string].length).to be > 0
+      end
+    end
+  end
+
+
 
   context "with mock objects" do
-    before do
-      savon.mock!
-      crypt = Envcrypt::Envcrypter.new
 
-      message = { :username => Settings.session.username, :password => crypt.decrypt(Settings.session.password) }
-      savon.expects(:login).with(message: message).returns(BCSpecFixtures.login)
-      savon.expects(:logout).with(message: { :token => BCSpecFixtures.login_token }).returns(BCSpecFixtures.logout)
-    end
-
+    before { savon.mock! }
     after { savon.unmock! }
 
-    it_behaves_like "Log in and out"
+    context "mock log in and out" do
+      before { mock_login_and_out }
+      it_behaves_like "Log in and out"
+    end
+
+    context "mock list spaces" do
+      before do
+        mock_login_and_out { savon.expects(:list_spaces).with(message: { :token => BCSpecFixtures.login_token }).returns(BCSpecFixtures.list_spaces) }
+      end
+      it_behaves_like "list spaces"
+    end
+
+    context "mock list users in spaces" do
+      let(:spaceID) { "b7f3df39-438c-4ec7-bd29-489f41afde14" }
+      before do
+        message = { :token => BCSpecFixtures.login_token, :spaceID => spaceID }
+        mock_login_and_out { savon.expects(:list_users_in_space).with(message: message).returns(BCSpecFixtures.list_users_in_space) }
+      end
+      it_behaves_like "list users in space"
+    end
   end
 
   context "with live connection to BWS", :live => true do
     it_behaves_like "Log in and out"
+    it_behaves_like "list spaces"
+
+    let(:spaceID) do
+      spaces = nil
+      Session.new { |bc| spaces = bc.list_spaces }
+      spaces[:user_space][0][:id]
+    end
+    it_behaves_like "list users in space"
   end
+
 end

@@ -49,5 +49,22 @@ module BCSpecFixtures
       </soap:Envelope>
       EOT
     end
+
+    def list_users_in_space
+      <<-EOT.unindent
+      <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <soap:Body>
+          <listUsersInSpaceResponse xmlns="http://www.birst.com/">
+            <listUsersInSpaceResult>
+              <string>user@example.com</string>
+              <string>myname@example.com</string>
+              <string>coolbeans@example.com</string>
+            </listUsersInSpaceResult>
+          </listUsersInSpaceResponse>
+        </soap:Body>
+      </soap:Envelope>
+      EOT
+    end
+
   end
 end
