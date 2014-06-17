@@ -17,4 +17,10 @@ module Birst_Command
   end
   load_default_settings
 
+  def self.load_settings_from_file(file)
+    parse_erb = ERB.new(IO.read(file)).result(binding)
+    settings = YAML.load(parse_erb).symbolize_keys
+    Settings.configure_from_hash(settings)
+  end
+
 end
