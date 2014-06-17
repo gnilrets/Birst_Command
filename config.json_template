@@ -1,6 +1,0 @@
-{
-    "wsdl": "https://app2102.bws.birst.com/CommandWebService.asmx?WSDL",
-    "endpoint": "https://app2102.bws.birst.com/CommandWebService.asmx",
-    "username": "name@myplace.com",
-    "password": "obfuscated pwd"
-}
