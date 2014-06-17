@@ -16,11 +16,9 @@ module Birst_Command
     #
     # Returns nothing
     def initialize(opts = {}, &block)
+      @login_token = nil
       @options = set_options(opts)
       @client = new_client
-
-      @login_token = nil
-      @auth_cookie = nil
 
       if block_given?
         login_and_run(&block)
@@ -44,6 +42,7 @@ module Birst_Command
           password: decrypt(@password)
         })
 
+      @soap_logger.debug "AUTH COOKIE IS #{@auth_cookie}"
       @auth_cookie = response.http.cookies if @auth_cookie.nil?
       @login_token = response.hash[:envelope][:body][:login_response][:login_result]
       response
@@ -92,6 +91,8 @@ module Birst_Command
       @username       = opts[:username]       || Settings.session.username
       @password       = opts[:password]       || Settings.session.password
       @auth_cookie    = opts[:auth_cookie]    || nil
+
+      @soap_logger.debug "SETTING OPTIONS USING #{opts}"
     end
 
 
