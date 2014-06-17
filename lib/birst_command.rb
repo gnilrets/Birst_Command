@@ -6,6 +6,7 @@ require 'securerandom'
 require 'json'
 require 'envcrypt'
 require 'configatron/core'
+require 'erb'
 
 require 'birst_command/settings'
 require 'birst_command/core_additions'
