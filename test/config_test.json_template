@@ -1,8 +1,0 @@
-{
-    "test": {
-        "test_add_user_to_space": {
-            "username": "mytestuser@company.com",
-            "space_id": "MYTESTSPACEID"
-        }
-    }
-}

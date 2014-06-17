@@ -11,8 +11,8 @@ Birst user that needed to set up a very basic Ruby interface.
 
 # Installation & Setup
 
-**SPECIAL NOTE:** Password management has changed since version 0.4.0.
-Read below for details.
+**SPECIAL NOTE:** Many changes since version 0.5.0.  Read the
+  [Changelog](CHANGELOG.md).
 
 Prerequisites: Ruby > 2.0 and rubygems.
 
@@ -21,15 +21,18 @@ rbenv/bundler as you prefer.
 
 After installing, you'll need to create a Birst Command config file
 that contains the credentials you'll use to connect to Birst.  This
-config file should look like,
+is a yaml file that should look something like
 
-    {
-        "wsdl": "https://app2102.bws.birst.com/CommandWebService.asmx?WSDL",
-        "endpoint": "https://app2102.bws.birst.com/CommandWebService.asmx",
-        "username": "name@myplace.com",
-        "password": "encrypted pwd"
-    }
-
+````yaml
+---
+session:
+  wsdl: "https://app2101.bws.birst.com/CommandWebService.asmx?WSDL"
+  endpoint: "https://app2101.bws.birst.com/CommandWebService.asmx"
+  username: "BirstUsername"
+  password: "EncryptedPassword"
+  soap_log: true
+  soap_log_level: :debug
+````
 Save it to `$HOME/.birstcl`.  Most users should only need to modify
 the username and password. (**Note**: do not use `login.bws.birst.com`
 since it does not use an updated WSDL; a specific app server must be
@@ -55,6 +58,15 @@ Copy and paste the encrypted password (aka "secret') into the
 `ENVCRYPT_KEY` environment variable is set as indicated above.  If you're
 running in a development environment, you can include these in your
 bash `~/.profile` file.
+
+Also note that the YAML config file is pre-processed with ERB.  So if
+you also want to keep your encrypted password in an environment
+variable, you could replace the `password` line above with
+````yaml
+  ...
+  password: "<%= ENV['MY_ENCRYPTED_PASSWORD'] %>"
+  ...
+````
 
 # Usage - Birst command line tool
 
@@ -106,9 +118,13 @@ In your Ruby program, include the Birst Command gem and load the config file via
 ````ruby
 require 'rubygems'
 require 'bundler/setup'
-require 'Birst_Command'
+require 'birst_command'
 
-Birst_Command::Config.read_config(File.join(File.dirname(__FILE__),"config.json"))
+Birst_Command.load_settings_from_file(file)
+
+# Or you can forego the settings file and set them explicitly in code via
+Birst_Command::Settings.session.username = "George"
+
 ````
 
 Birst commands are submitted in session blocks, which automatically
@@ -117,7 +133,7 @@ logging out.  For example, to list all spaces that you have rights to,
 you can submit the following code
 
 ````ruby
-Birst_Command::Session.start do |bc|
+Birst_Command::Session.new do |bc|
   spaces = bc.list_spaces
   puts "#{JSON.pretty_generate spaces}"
 end
@@ -153,7 +169,7 @@ as an argument hash.  All arguments are mandatory even if they're blank/null
 (Birst web API requirement).  For example, to create a new space,
 
 ````ruby
-Birst_Command::Session.start do |bc|
+Birst_Command::Session.new do |bc|
   new_space_id = bc.create_new_space :spaceName => "myNewSpace", :comments => "Just testing",:automatic => "false"
 end
 ````
@@ -167,16 +183,16 @@ a copy job and save the `session_cookie` and `job_token` in variables.
 ````ruby
 session_cookie = nil
 job_token = nil
-Session.start do |bc|
+Bist_Command::Session.new do |bc|
   job_token = bc.copy_space :spFromID => @from_id, :spToID => @to_id, :mode => "replicate", :options => "data;datastore;useunloadfeature"
-  session_cookie = bc.auth_cookies
+  session_cookie = bc.auth_cookie
 end
 ````
 In a subsequent session we can use the `session_cookie` on login via
 
 ````ruby
 is_job_complete = false
-Session.start use_cookie: session_cookie do |bc|
+Birst_Command::Session.new auth_cookie: session_cookie do |bc|
   is_job_complete = bc.is_job_complete :jobToken => job_token
 end
 puts "COMPLETE? #{is_job_complete}"
@@ -224,8 +240,3 @@ entirely consistent in its use of camelCase for arguments (e.g.,
 `listUsersInSpace`).  This inconsistency requires us to **submit
 commands as snake_case and arguments as the camelCase that Birst
 uses.**
-
-# Changelog
-
-* 0.5.0
-  * Migrated password handling to use Envcrypt

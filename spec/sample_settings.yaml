@@ -1,0 +1,9 @@
+---
+
+session:
+  wsdl: "https://app2101.bws.birst.com/CommandWebService.asmx?WSDL"
+  endpoint: "https://app2101.bws.birst.com/CommandWebService.asmx"
+  username: "ThisIsntARealUsername"
+  password: "<%= ENV['BC_SPEC_PASSWORD'] %>"
+  soap_log: true
+  soap_log_level: :error
