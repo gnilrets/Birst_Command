@@ -1,4 +1,4 @@
-describe "Loading settings from YAML file", :focus => true do
+describe "Loading settings from YAML file" do
 
   let(:test_password) { "Habedashery==" }
 
