@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    Birst_Command (0.5.0)
+    Birst_Command (0.6.0)
       configatron (~> 3.2)
       envcrypt (~> 0.1)
       httpclient (~> 2.3)
