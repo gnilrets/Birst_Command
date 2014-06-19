@@ -119,7 +119,6 @@ module Birst_Command
     def login_and_run(&block)
       login
       yield self
-    ensure
       logout
     end
 
